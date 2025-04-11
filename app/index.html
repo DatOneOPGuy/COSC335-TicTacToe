@@ -3,15 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <title>Tic Tac Toe</title>
-    <!-- React -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-
-    <!-- Zustand (vanilla version for browser use) -->
-    <script type="module">
-      import { createStore } from "https://cdn.skypack.dev/zustand/vanilla";
-      window.zustand = { create: createStore };
-    </script>
+    <script type="module" src="./src/logic.js"></script>
+    <script type="module" src="./src/store.js"></script>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -54,7 +47,8 @@
     </div>
 
     <div id="app"></div>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="/src/main.js"></script>
+
 
     <script>
       function handleLogin() {

@@ -18,12 +18,7 @@ export function checkWinner(board) {
 }
 
 
-export async function saveGame(board, winner) {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  const idToken = await user.getIdToken();
-
+export async function saveGame(board, winner, idToken) {
   await fetch("http://localhost:3000/save-game", {
     method: "POST",
     headers: {

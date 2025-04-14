@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script>
+<<<<<<< HEAD
       const firebaseConfig = {
           apiKey: "AIzaSyDlyiMS2COi5TwMkJ-vQAoZLA6wuH7TKKY",
           authDomain: "cosc335-tictactoe-ef24e.firebaseapp.com",
@@ -22,9 +23,91 @@
 };
       const app = firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth();
+=======
+      fetch("/firebaseConfig.json")
+        .then(res => res.json())
+        .then(config => {
+          const app = firebase.initializeApp(config);
+          const auth = firebase.auth();
+          window.firebaseApp = app;
+          window.firebaseAuth = auth; 
+
+          window.handleLogin = function () {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            auth.signInWithEmailAndPassword(email, password)
+              .then((userCredential) => {
+                const user = userCredential.user;
+                displayUserInfo(user);
+              })
+              .catch((error) => {
+                console.error("Error logging in:", error.message);
+              });
+          };
+
+          window.handleRegister = function () {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            auth.createUserWithEmailAndPassword(email, password)
+              .then((userCredential) => {
+                const user = userCredential.user;
+                displayUserInfo(user);
+              })
+              .catch((error) => {
+                console.error("Error registering:", error.message);
+              });
+          };
+
+          window.handleGoogleLogin = function () {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+              .then((result) => {
+                const user = result.user;
+                displayUserInfo(user);
+              })
+              .catch((error) => {
+                console.error("Google login error:", error.message);
+              });
+          };
+
+          window.handleLogout = function () {
+            auth.signOut().then(() => {
+              document.getElementById("user-info").style.display = "none";
+              document.getElementById("login-form").style.display = "block";
+            }).catch((error) => {
+              console.error("Logout error:", error.message);
+            });
+          };
+
+          auth.onAuthStateChanged((user) => {
+            const loginForm = document.getElementById("login-form");
+            const userInfo = document.getElementById("user-info");
+            const appDiv = document.getElementById("app");
+
+            if (user) {
+              displayUserInfo(user);
+              appDiv.style.display = "block";
+              loginForm.style.display = "none";
+              userInfo.style.display = "block";
+            } else {
+              appDiv.style.display = "none";
+              loginForm.style.display = "block";
+              userInfo.style.display = "none";
+            } 
+          });
+        })
+        .catch(err => {
+          console.error("Failed to load Firebase config:", err);
+        });
+
+      function displayUserInfo(user) {
+        document.getElementById("user-name").textContent = user.displayName || user.email;
+        document.getElementById("user-info").style.display = "block";
+        document.getElementById("login-form").style.display = "none";
+      }
+>>>>>>> 4d172859d62e870e463a35f878fbb41451f13995
     </script>
 
-    <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
@@ -49,77 +132,5 @@
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
 
-
-    <script>
-      function handleLogin() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        auth.signInWithEmailAndPassword(email, password)
-          .then((userCredential) => {
-            const user = userCredential.user;
-            displayUserInfo(user);
-          })
-          .catch((error) => {
-            console.error("Error logging in:", error.message);
-          });
-      }
-  
-      function handleRegister() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        auth.createUserWithEmailAndPassword(email, password)
-          .then((userCredential) => {
-            const user = userCredential.user;
-            displayUserInfo(user);
-          })
-          .catch((error) => {
-            console.error("Error registering:", error.message);
-          });
-      }
-  
-      function handleGoogleLogin() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider)
-          .then((result) => {
-            const user = result.user;
-            displayUserInfo(user);
-          })
-          .catch((error) => {
-            console.error("Google login error:", error.message);
-          });
-      }
-  
-      function handleLogout() {
-        auth.signOut().then(() => {
-          document.getElementById("user-info").style.display = "none";
-          document.getElementById("login-form").style.display = "block";
-        }).catch((error) => {
-          console.error("Logout error:", error.message);
-        });
-      }
-  
-      function displayUserInfo(user) {
-        document.getElementById("user-name").textContent = user.displayName || user.email;
-        document.getElementById("user-info").style.display = "block";
-        document.getElementById("login-form").style.display = "none";
-      }
-  
-      auth.onAuthStateChanged((user) => {
-        const loginForm = document.getElementById("login-form");
-        const userInfo = document.getElementById("user-info");
-        const appDiv = document.getElementById("app");
-
-        if (user) {
-          displayUserInfo(user);
-          appDiv.style.display = "block";
-          loginForm.style.display = "none";
-          userInfo.style.display = "block";
-        } else {
-          appDiv.style.display = "none";
-          loginForm.style.display = "block";
-          userInfo.style.display = "none";
-        } 
-      });
-    </script>    
   </body>
 </html>

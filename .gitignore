@@ -1,5 +1,6 @@
 app/.env
 app/serviceAccountKey.json
+app/firebaseConfig.json
 app/package-lock.json
 app/node_modules/
 # Logs
@@ -10,6 +11,8 @@ app/yarn-debug.log*
 app/yarn-error.log*
 app/pnpm-debug.log*
 app/lerna-debug.log*
+
+app/coverage
 
 app/dist
 app/dist-ssr

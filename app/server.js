@@ -52,7 +52,7 @@ app.post("/save-game", async (req, res) => {
 
 
 
-const PORT = process.env.APP_PORT || 5000;
+const PORT = process.env.VITE_BACKEND_PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

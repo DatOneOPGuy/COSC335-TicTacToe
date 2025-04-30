@@ -26,20 +26,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
 app.post("/save-game", async (req, res) => {
   const idToken = req.headers.authorization?.split("Bearer ")[1];
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
-    const { board, winner, timestamp } = req.body;
-    console.log(`save-game params ${uid}  ${board}  ${winner}  ${timestamp}`);
+    const { townmap, points, timestamp } = req.body;
 
-    await db.collection("games").add({
+    console.log(`save-game params ${uid}  ${townmap}  ${points}  ${timestamp}`);
+
+    await db.collection("towns").add({
       uid,
-      board,
-      winner,
+      townmap,
+      points,
       timestamp: timestamp || new Date().toISOString(),
     });
 

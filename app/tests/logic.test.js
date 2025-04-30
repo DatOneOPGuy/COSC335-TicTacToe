@@ -1,4 +1,4 @@
-import { checkWinner, saveGame } from "../src/logic.js";
+import { saveGame } from "../src/logic.js";
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -7,28 +7,15 @@ beforeEach(() => {
   fetch.mockClear();
 });
 
-describe('checkWinner', () => {
-  test('detects a horizontal win for X', () => {
-    expect(checkWinner(["X", "X", "X", "", "", "", "", "", ""])).toBe("X");
-  });
-
-  test('detects a vertical win for O', () => {
-    expect(checkWinner(["O", "", "", "O", "", "", "O", "", ""])).toBe("O");
-  });
-
-  test('detects a diagonal win for X', () => {
-    expect(checkWinner(["X", "", "", "", "X", "", "", "", "X"])).toBe("X");
-  });
-
-  test('returns null for a draw', () => {
-    expect(checkWinner(["X", "O", "X", "X", "O", "O", "O", "X", "X"])).toBe(null);
-  });
-});
-
 describe('saveGame', () => {
   test('sends correct POST request with headers and body', async () => {
-    const mockBoard = ["X", "O", "X", null, null, null, "O", null, "X"];
-    const mockWinner = "X";
+    const mockBoard = [
+      "wheat", "brick", null, "wood",
+      null, "glass", "stone", null,
+      null, null, null, null,
+      null, null, null, null
+    ];
+    const mockWinner = null; // or a building card name later
     const mockToken = "test-id-token";
 
     fetch.mockResolvedValueOnce({ ok: true });

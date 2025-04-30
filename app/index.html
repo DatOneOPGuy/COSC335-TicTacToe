@@ -59,7 +59,7 @@
 
           window.handleLogout = function () {
             auth.signOut().then(() => {
-              document.getElementById("user-info").style.display = "none";
+              document.getElementById("app").style.display = "none";
               document.getElementById("login-form").style.display = "block";
             }).catch((error) => {
               console.error("Logout error:", error.message);
@@ -68,18 +68,14 @@
 
           auth.onAuthStateChanged((user) => {
             const loginForm = document.getElementById("login-form");
-            const userInfo = document.getElementById("user-info");
             const appDiv = document.getElementById("app");
 
             if (user) {
-              displayUserInfo(user);
               appDiv.style.display = "block";
               loginForm.style.display = "none";
-              userInfo.style.display = "block";
             } else {
               appDiv.style.display = "none";
               loginForm.style.display = "block";
-              userInfo.style.display = "none";
             } 
           });
         })
@@ -97,7 +93,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
-    <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg">
+    <div class="w-full max-w-sm p-6 bg-clear rounded-lg shadow-lg">
       <div id="login-form">
         <input type="email" id="email" placeholder="Email" class="w-full p-3 mb-4 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
         <input type="password" id="password" placeholder="Password" class="w-full p-3 mb-4 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
@@ -109,10 +105,6 @@
         <button onclick="handleGoogleLogin()" class="w-full py-3 mt-4 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">Login with Google</button>
       </div>
   
-      <div id="user-info" style="display:none;" class="text-center mt-6">
-        <p class="text-gray-700">Welcome, <span id="user-name" class="font-semibold text-blue-600"></span></p>
-        <button onclick="handleLogout()" class="mt-4 py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">Logout</button>
-      </div>
     </div>
 
     <div id="app"></div>

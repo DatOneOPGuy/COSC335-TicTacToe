@@ -14,7 +14,7 @@ export function ResourceSelector() {
           key={res}
           onClick={() => setSelected(res)}
           className={`px-4 py-2 rounded ${
-            selected === res ? 'bg-blue-500 text-white' : 'bg-gray-300'
+            selected === res ? 'border-blue-400 text-white' : 'border-gray-300'
           }`}
         >
           {res}

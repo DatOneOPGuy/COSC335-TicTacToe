@@ -18,7 +18,12 @@ export function checkWinner(board) {
 }
 
 
-export async function saveGame(board, winner, idToken) {
+export async function saveGame(townmap, points, idToken) {
+  console.log("Saving game...");
+  console.log("townmap:", townmap);
+  console.log("points:", points);
+  console.log("idToken:", idToken);
+
   await fetch("http://localhost:3000/save-game", {
     method: "POST",
     headers: {
@@ -26,9 +31,10 @@ export async function saveGame(board, winner, idToken) {
       Authorization: `Bearer ${idToken}`,
     },
     body: JSON.stringify({
-      board,
-      winner,
+      townmap,
+      points,
       timestamp: new Date().toISOString(),
+      uid: idToken, // Assuming idToken is the user ID
     }),
   });
 }

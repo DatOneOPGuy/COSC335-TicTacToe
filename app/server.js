@@ -6,11 +6,8 @@ import cors from "cors";
 import admin from "firebase-admin";
 import dotenv from "dotenv";
 
-
-
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 
 const serviceAccount = JSON.parse(
   fs.readFileSync(path.join(__dirname, "serviceAccountKey.json"))
@@ -19,8 +16,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 const db = admin.firestore();
-
-
 
 const app = express();
 app.use(cors());
@@ -32,14 +27,15 @@ app.post("/save-game", async (req, res) => {
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
-    const { townmap, points, timestamp } = req.body;
+    const { townmap, points, timestamp, starttime } = req.body; // Include starttime
 
-    console.log(`save-game params ${uid}  ${townmap}  ${points}  ${timestamp}`);
+    console.log(`save-game params ${uid}  ${townmap}  ${points}  ${timestamp}  ${starttime}`);
 
     await db.collection("towns").add({
       uid,
       townmap,
       points,
+      starttime: starttime || null, // Save starttime if provided
       timestamp: timestamp || new Date().toISOString(),
     });
 
@@ -49,8 +45,6 @@ app.post("/save-game", async (req, res) => {
     res.status(500).send({ error: "Failed to save game" });
   }
 });
-
-
 
 const PORT = process.env.VITE_BACKEND_PORT || 5000;
 app.listen(PORT, () => {

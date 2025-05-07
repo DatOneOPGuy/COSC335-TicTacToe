@@ -66,7 +66,7 @@ const buildingPatterns = {
   },
   trading_post: {
     name: 'Trading Post',
-    icon: '🏪',
+    icon: '📦',
     pattern: [
 
       [null, 'wood', 'stone'],

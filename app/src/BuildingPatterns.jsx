@@ -44,6 +44,7 @@ const buildingPatterns = {
     name: 'Tavern',
     icon: '🍺',
     pattern: [
+      [null,null,null],
       ['brick', 'brick', 'glass']
     ]
   },
@@ -59,20 +60,35 @@ const buildingPatterns = {
     name: 'Chapel',
     icon: '⛪',
     pattern: [
-      ['glass', 'stone'],
-      [null, 'glass'],
-      [null, 'stone'],
+      [null, null, 'glass'],
+      ['stone', 'glass', 'stone']
     ]
   },
   trading_post: {
     name: 'Trading Post',
     icon: '🏪',
     pattern: [
-      ['stone', 'stone'],
-      ['wood', 'wood'],
-      [null, 'brick']
+
+      [null, 'wood', 'stone'],
+      ['brick', 'wood', 'stone']
     ]
-  }
+  },
+  theater: {
+    name: 'Theater',
+    icon: '🎭',
+    pattern: [
+      [null, 'stone', null],
+      ['brick', 'glass', 'brick']
+    ],
+  },
+  factory: {
+    name: 'Factory',
+    icon: '🏭',
+    pattern: [
+      ['wood', null, null,null],
+      ['brick', 'stone', 'stone', 'brick'],
+    ],
+  },
 };
 
 export function BuildingPattern({ buildingType }) {
@@ -109,4 +125,4 @@ export function BuildingIcon({ buildingType }) {
       {pattern.icon}
     </div>
   );
-} 
+}

@@ -61,6 +61,24 @@ const buildingTypes = {
     pattern: 'complex',
     check: checkTradingPost,
   },
+  theater: {
+    name: 'Theater',
+    resources: ['brick', 'glass', 'brick', 'stone'],
+    pattern: 'custom',
+    check: (selectedCells, grid) => {
+      // Add custom validation logic for Theater
+      return true; // Placeholder
+    },
+  },
+  factory: {
+    name: 'Factory',
+    resources: ['brick', 'stone', 'brick', 'glass', 'glass'],
+    pattern: 'custom',
+    check: (selectedCells, grid) => {
+      // Add custom validation logic for Factory
+      return true; // Placeholder
+    },
+  },
 };
 
 export function BuildingButtons() {
@@ -73,21 +91,16 @@ export function BuildingButtons() {
     const building = buildingTypes[buildingType];
     if (!building) return false;
 
-    // Get resources from selected cells
     const selectedResources = selectedCells.map(index => grid[index]);
-    
-    // Check if we have the right number of resources
     if (selectedResources.length !== building.resources.length) return false;
 
-    // Check if we have the right resources
     const requiredResources = [...building.resources].sort();
     const actualResources = [...selectedResources].sort();
-    
+
     if (!requiredResources.every((resource, index) => resource === actualResources[index])) {
       return false;
     }
 
-    // Check the pattern
     return building.check(selectedCells, grid);
   };
 
@@ -97,29 +110,61 @@ export function BuildingButtons() {
     }
   };
 
-  return (
-    <div className="left-4 top-4 grid grid-cols-2 gap-2 w-fit">
-      {Object.entries(buildingTypes).map(([type, building]) => {
-        const canBuild = canBuildBuilding(type);
-        const isSelected = selectedBuilding === type;
+  const buildingEntries = Object.entries(buildingTypes);
+  const topNineBuildings = buildingEntries.slice(0, 9);
+  const bottomTwoBuildings = buildingEntries.slice(9);
 
-        return (
-          <button
-            key={type}
-            onClick={() => handleBuildingClick(type)}
-            disabled={!canBuild}
-            className={`p-1 rounded-md flex flex-col items-center gap-1 min-w-[80px] text-sm ${
-              canBuild
-                ? isSelected
-                  ? 'bg-amber-800 text-white'
-                  : 'bg-amber-700 text-white hover:bg-amber-600'
-                : 'bg-amber-900 text-white cursor-not-allowed'
-            }`}
-          >
-            <BuildingPattern buildingType={type} />
-          </button>
-        );
-      })}
+  return (
+    <div className="flex flex-col items-center gap-4">
+      {/* 3x3 Grid */}
+      <div className="grid grid-cols-3 gap-2">
+        {topNineBuildings.map(([type, building]) => {
+          const canBuild = canBuildBuilding(type);
+          const isSelected = selectedBuilding === type;
+
+          return (
+            <button
+              key={type}
+              onClick={() => handleBuildingClick(type)}
+              disabled={!canBuild}
+              className={`p-1 rounded-md flex flex-col items-center gap-1 min-w-[80px] text-sm ${
+                canBuild
+                  ? isSelected
+                    ? 'bg-amber-800 text-white'
+                    : 'bg-amber-700 text-white hover:bg-amber-600'
+                  : 'bg-amber-900 text-white cursor-not-allowed'
+              }`}
+            >
+              <BuildingPattern buildingType={type} />
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Two Buttons Below */}
+      <div className="flex gap-4">
+        {bottomTwoBuildings.map(([type, building]) => {
+          const canBuild = canBuildBuilding(type);
+          const isSelected = selectedBuilding === type;
+
+          return (
+            <button
+              key={type}
+              onClick={() => handleBuildingClick(type)}
+              disabled={!canBuild}
+              className={`p-1 rounded-md flex flex-col items-center gap-1 min-w-[80px] text-sm ${
+                canBuild
+                  ? isSelected
+                    ? 'bg-amber-800 text-white'
+                    : 'bg-amber-700 text-white hover:bg-amber-600'
+                  : 'bg-amber-900 text-white cursor-not-allowed'
+              }`}
+            >
+              <BuildingPattern buildingType={type} />
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
-}  
+}

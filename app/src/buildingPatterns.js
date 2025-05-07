@@ -357,3 +357,4 @@ export function checkTradingPost(selectedCells, grid) {
   }
   return false;
 } 
+

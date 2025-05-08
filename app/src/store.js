@@ -64,7 +64,7 @@ export const useTownStore = create((set, get) => ({
   buildings: {},
 
   shuffleDeck: () => {
-    const deck = shuffleArray([...resourceTypes, ...resourceTypes]);
+    const deck = shuffleArray([...resourceTypes, ...resourceTypes, ...resourceTypes]);
     set({ deck, selectedResource: deck[0] });
   },
 

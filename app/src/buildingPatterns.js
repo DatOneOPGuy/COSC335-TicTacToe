@@ -358,3 +358,128 @@ export function checkTradingPost(selectedCells, grid) {
   return false;
 } 
 
+
+export function checkFactory(selectedCells, grid){
+  if (selectedCells.length != 5) return false;
+
+  let woodLocation = null;
+  let hasWood = false;
+  let brickLocations = [];
+  let brickCount = 0;
+  let stoneLocations = [];
+  let stoneCount = 0;
+
+  for (const index of selectedCells){
+    const resource = grid[index];
+    if (resource === 'stone') {
+      stoneLocations.push({ row: getRow(index), col: getCol(index) });
+      stoneCount++;
+    } else if (resource === 'wood') {
+      woodLocation = { row: getRow(index), col: getCol(index) }
+      hasWood = true;
+    } else if (resource === 'brick') {
+      brickLocations.push({ row: getRow(index), col: getCol(index) });
+      brickCount++;
+    }
+  }
+
+  if (!hasWood || stoneCount != 2 || brickCount != 2) return false;
+  let [stone1, stone2] = stoneLocations;
+  let [brick1, brick2] = brickLocations;
+
+  if (stone1.col > stone2.col){
+    const temp = stone1;
+    stone1 = stone2;
+    stone2 = temp;
+  }
+  if (brick1.col > brick2.col){
+    const temp = brick1;
+    brick1 = brick2;
+    brick2 = temp;
+  }
+
+  //check horizontal pattern
+  if (stone1.row === stone2.row && brick1.row == brick2.row && stone1.row === brick1.row){
+    if (brick1.col + 1 === stone1.col && stone1.col + 1 === stone2.col && stone2.col + 1 === brick2.col){
+      if ((brick1.col === woodLocation.col && difference(brick1.row, woodLocation.row) === 1) || (brick2.row === woodLocation.row && difference(brick2.col, woodLocation.col) === 1)){
+        return true;
+      }
+    }
+  }
+
+  if (stone1.row > stone2.row){
+    const temp = stone1;
+    stone1 = stone2;
+    stone2 = temp;
+  }
+  if (brick1.row > brick2.row){
+    const temp = brick1;
+    brick1 = brick2;
+    brick2 = temp;
+  }
+  if (stone1.col === stone2.col && brick1.col === brick2.col && stone1.col === brick1.col){
+    if (brick1.row + 1 === stone1.row && stone1.row +1 === stone2.row && stone2.row + 1 === brick2.row){
+      if ((brick1.row === woodLocation.row && difference(brick1.col, woodLocation.col) === 1) || (brick2.row === woodLocation.row && difference(brick2.col, woodLocation.col) === 1)){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+export function checkTheater(selectedCells, grid){
+  if (selectedCells.length != 4) return false;
+
+  let stoneLocation = null;
+  let hasStone = false;
+  let brickLocations = [];
+  let brickCount = 0;
+  let glassLocation = null;
+  let hasGlass = false;
+
+  for (const index of selectedCells){
+    const resource = grid[index];
+    if (resource === 'stone') {
+      stoneLocation = { row: getRow(index), col: getCol(index) };
+      hasStone = true;
+    } else if (resource === 'glass') {
+      glassLocation = { row: getRow(index), col: getCol(index) }
+      hasGlass = true;
+    } else if (resource === 'brick') {
+      brickLocations.push({ row: getRow(index), col: getCol(index) });
+      brickCount++;
+    }
+  }
+
+  if (!hasStone || !hasGlass || brickCount != 2) return false;
+  let [brick1, brick2] = brickLocations;
+
+  if (brick1.col > brick2.col){
+    const temp = brick1;
+    brick1 = brick2;
+    brick2 = temp;
+  }
+
+  //check horizontal pattern
+  if (brick1.row == brick2.row && brick2.row == glassLocation.row){
+    if (brick1.col + 1 == glassLocation.col && glassLocation.col + 1 == brick2.col){
+      if (glassLocation.col == stoneLocation.col && difference(glassLocation.row, stoneLocation.row) == 1){
+        return true;
+      }
+    }
+  }
+
+  if (brick1.row > brick2.row){
+    const temp = brick1;
+    brick1 = brick2;
+    brick2 = temp;
+  }
+  if (brick1.col == brick2.col && brick2.col == glassLocation.col){
+    if (brick1.row + 1 == glassLocation.row && glassLocation.row + 1 == brick2.row){
+      if (glassLocation.row == stoneLocation.row && difference(glassLocation.col, stoneLocation.col) == 1){
+        return true;
+      }
+    }
+  }
+  return false;
+}

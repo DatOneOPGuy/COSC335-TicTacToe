@@ -9,6 +9,8 @@ import {
   checkMarket,
   checkChapel,
   checkTradingPost,
+  checkFactory,
+  checkTheater
 } from './buildingPatterns.js';
 import { BuildingPattern } from './BuildingPatterns.jsx';
 
@@ -65,19 +67,13 @@ const buildingTypes = {
     name: 'Theater',
     resources: ['brick', 'glass', 'brick', 'stone'],
     pattern: 'custom',
-    check: (selectedCells, grid) => {
-      // Add custom validation logic for Theater
-      return true; // Placeholder
-    },
+    check: checkTheater,
   },
   factory: {
     name: 'Factory',
-    resources: ['brick', 'stone', 'brick', 'glass', 'glass'],
+    resources: ['brick', 'stone', 'brick', 'stone', 'wood'],
     pattern: 'custom',
-    check: (selectedCells, grid) => {
-      // Add custom validation logic for Factory
-      return true; // Placeholder
-    },
+    check: checkFactory,
   },
 };
 

@@ -5,7 +5,7 @@ const resourceStyles = {
   wheat: 'bg-yellow-400',
   wood: 'bg-amber-800',
   brick: 'bg-red-600',
-  glass: 'bg-blue-400',
+  glass: 'bg-blue-900',
   stone: 'bg-gray-400',
 };
 
@@ -23,7 +23,7 @@ export function ResourceDeck() {
           key={idx}
           onClick={() => setSelected(res)}
           className={`flex items-center gap-2 px-3 py-2 border-2 rounded-md text-sm capitalize ${
-            selected === res ? 'border-blue-400' : 'border-transparent'
+            selected === res ? 'border-blue-400' : 'border-gray-500'
           }`}
         >
           <div className={`w-5 h-5 rounded ${resourceStyles[res]}`}></div>

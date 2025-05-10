@@ -17,7 +17,7 @@ export function checkWinner(board) {
   return null;
 }
 
-export function calculateScore(board) {
+export function calculateScore(board, isEndOfGame = false) {
   let totalScore = 0;
 
   const cottages = [];
@@ -27,13 +27,13 @@ export function calculateScore(board) {
   const taverns = [];
   const markets = [];
   const cathedrals = [];
-  const emptySpaces = [];
+  const emptyOrResourceCells = [];
 
   // Categorize buildings and resources
   board.forEach((cell, index) => {
-    if (!cell) {
-      emptySpaces.push(index);
-    } else if (cell.type === 'building') {
+    if (!cell || cell.type !== 'building') {
+      emptyOrResourceCells.push(index); // Track empty or resource-filled cells
+    } else {
       switch (cell.building) {
         case 'cottage':
           cottages.push(index);
@@ -113,8 +113,10 @@ export function calculateScore(board) {
     totalScore += 3 + adjacentMarkets.length + adjacentChapels.length;
   });
 
-  // Subtract points for empty spaces (-1 VP per empty space)
-  totalScore -= emptySpaces.length;
+  // Subtract points for empty or resource-filled cells only at the end of the game
+  if (isEndOfGame) {
+    totalScore -= emptyOrResourceCells.length;
+  }
 
   return totalScore;
 }
@@ -140,27 +142,30 @@ export async function saveGameWithScore(board, idToken) {
   return points;
 }
 
-export async function saveGame(board, idToken, starttime = null) {
-  const points = calculateScore(board);
-  const townmap = board.map((cell) => (cell ? (cell.type === 'building' ? cell.building : cell) : '0'));
+export async function saveGame(board, idToken, startTime = null, endTime = null) {
+  const points = calculateScore(board, true); // Calculate final score
+  const townmap = board.map((cell) =>
+    cell ? (cell.type === 'building' ? cell.building : cell) : '0'
+  );
 
-  console.log("Saving game...");
-  console.log("townmap:", townmap);
-  console.log("points:", points);
-  console.log("idToken:", idToken);
+  console.log('Saving game...');
+  console.log('townmap:', townmap);
+  console.log('points:', points);
+  console.log('startTime:', startTime);
+  console.log('endTime:', endTime);
 
-  await fetch("http://localhost:3000/save-game", {
-    method: "POST",
+  await fetch('http://localhost:3000/save-game', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${idToken}`,
     },
     body: JSON.stringify({
       townmap,
       points,
-      starttime,
+      startTime,
+      endTime,
       timestamp: new Date().toISOString(),
-      uid: idToken, // Assuming idToken is the user ID
     }),
   });
 

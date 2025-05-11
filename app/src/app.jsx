@@ -24,6 +24,24 @@ function convertBoardToArray(board) {
   });
 }
 
+const initializePlayer = async () => {
+  const user = firebase.auth().currentUser;
+  if (user) {
+    try {
+      const idToken = await user.getIdToken();
+      await fetch('http://localhost:3000/player/init', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing player:', error);
+    }
+  }
+};
+
 export function App() {
   const resetGrid = useTownStore((s) => s.resetGrid);
   const shuffleDeck = useTownStore((s) => s.shuffleDeck);
@@ -68,6 +86,16 @@ export function App() {
       alert('No user is signed in.');
     }
   };
+
+    // Add this to your useEffect that handles authentication
+    useEffect(() => {
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          await initializePlayer();
+          // ...existing auth state change code...
+        }
+      });
+    }, []);
 
   // Render the profile view if `showProfile` is true
   if (showProfile) {

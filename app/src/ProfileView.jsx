@@ -2,7 +2,7 @@ import React from 'react';
 import { useTownStore } from './store.js';
 
 export function ProfileView({ onBackToGame }) {
-  const [achievements, setAchievements] = React.useState([]);
+  const [achievementsData, setAchievementsData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -28,8 +28,10 @@ export function ProfileView({ onBackToGame }) {
         }
 
         const achievementsData = await response.json();
-        console.log('Fetched Achievements:', achievementsData); // Debugging
-        setAchievements(achievementsData);
+        console.log('Fetched Player Data:', achievementsData); // Debugging
+
+        // Store the raw JSON data
+        setAchievementsData(achievementsData);
       } catch (error) {
         console.error('Error fetching achievements:', error);
       } finally {
@@ -45,39 +47,35 @@ export function ProfileView({ onBackToGame }) {
   }
 
   return (
-    <div className="p-6 bg-brown-100 min-h-screen">
-      <button
-        onClick={onBackToGame}
-        className="mb-4 px-4 py-2 bg-brown-600 text-white rounded hover:bg-brown-700"
-      >
-        Back to Game
-      </button>
-
-      <h1 className="text-3xl font-bold mb-6 text-brown-800">Profile</h1>
-
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-brown-700">Achievements</h2>
-        {achievements.length > 0 ? (
-          <table className="w-full border-collapse border border-brown-700">
-            <thead>
-              <tr className="bg-brown-300">
-                <th className="border border-brown-700 px-4 py-2 text-left">Name</th>
-                <th className="border border-brown-700 px-4 py-2 text-left">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {achievements.map((achievement, index) => (
-                <tr key={index} className={index % 2 === 0 ? 'bg-brown-200' : 'bg-brown-100'}>
-                  <td className="border border-brown-700 px-4 py-2">{achievement.name}</td>
-                  <td className="border border-brown-700 px-4 py-2">{achievement.description}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="text-brown-600">No achievements earned yet.</p>
-        )}
-      </section>
+    <div className="min-h-screen p-10 text-white">
+      <div className=" mx-auto bg-[#161b22] rounded-xl shadow-2xl p-8 border border-gray-700">
+        <button
+          onClick={onBackToGame}
+          className="mb-6 px-4 py-2 bg-[#d73a49] text-white rounded hover:bg-[#e55353] transition"
+        >
+          ⬅ Back to Game
+        </button>
+  
+        <h1 className="text-4xl font-extrabold mb-8 text-yellow-400 text-center">
+          🧙 Player Profile
+        </h1>
+  
+        <section className="mb-10">
+          <h2 className="text-2xl font-semibold mb-4 text-yellow-300">🏆 Achievements</h2>
+          <ul className="space-y-3 pl-4">
+            {achievementsData?.Acheivements?.map((achievement, index) => (
+              <li
+                key={index}
+                className="flex items-center text-lg text-gray-200"
+              >
+                <span className="text-yellow-400 mr-2">⭐</span>
+                {achievement}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </div>
   );
+  
 }

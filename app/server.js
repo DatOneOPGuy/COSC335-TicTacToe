@@ -32,6 +32,7 @@ app.post("/save-game", async (req, res) => {
     console.log(`Saving game for user ${uid}`);
     console.log(`Start Time: ${startTime}, End Time: ${endTime}`);
 
+    // Save the game
     await db.collection("towns").add({
       uid,
       townmap,
@@ -41,10 +42,50 @@ app.post("/save-game", async (req, res) => {
       timestamp: timestamp || new Date().toISOString(),
     });
 
+    // Check if this is the player's first town
+    const playerRef = db.collection('players').doc(uid);
+    const playerDoc = await playerRef.get();
+    const playerData = playerDoc.data();
+
+    if (!playerData.Achievements.includes('First Town Built!')) {
+      // Add the achievement
+      await playerRef.update({
+        Achievements: admin.firestore.FieldValue.arrayUnion('First Town Built!')
+      });
+      console.log(`Added "First Town Built!" achievement to player ${uid}`);
+    }
+
     res.status(200).send({ success: true });
   } catch (error) {
     console.error("Failed to save game:", error);
     res.status(500).send({ error: "Failed to save game" });
+  }
+});
+
+app.post('/player/init', async (req, res) => {
+  const idToken = req.headers.authorization?.split('Bearer ')[1];
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+
+    // Check if player document already exists
+    const playerDoc = await db.collection('players').doc(uid).get();
+
+    if (!playerDoc.exists) {
+      // Create new player document
+      await db.collection('players').doc(uid).set({
+        uid: uid,
+        Achievements: [],
+        created: admin.firestore.FieldValue.serverTimestamp()
+      });
+      console.log(`Created new player document for UID: ${uid}`);
+    }
+
+    res.status(200).send({ success: true });
+  } catch (error) {
+    console.error('Error initializing player:', error);
+    res.status(500).send({ error: 'Failed to initialize player' });
   }
 });
 
@@ -63,12 +104,14 @@ app.get('/achievements', async (req, res) => {
     }
 
     const playerData = playerDoc.data();
-    const achievements = playerData.achievements || []; // Default to an empty array if no achievements
-
+    const achievements = playerData.Achievements || "nah u dont have any lol"; // Default to an empty array if no achievements
+    console.log('Player Data:', playerData); // Debugging
     console.log('Achievements:', achievements); // Debugging
+    console.log('hi'); // Debugging
 
-    res.status(200).send(achievements);
+    res.status(200).send(playerData);
   } catch (error) {
+    console.log(playerDoc); // Debugging
     console.error('Error fetching achievements:', error);
     res.status(500).send({ error: 'Failed to fetch achievements' });
   }

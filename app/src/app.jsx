@@ -71,13 +71,21 @@ export function App() {
     if (user) {
       try {
         const idToken = await user.getIdToken();
-        const endTime = new Date().toISOString(); // Capture the end time
-        const points = calculateScore(board, true); // Calculate final score
+        const endTime = new Date().toISOString();
+        const points = calculateScore(board, true);
 
-        // Save the game with startTime and endTime
-        await saveGame(board, idToken, startTime, endTime);
+        // Save the game and get new achievements
+        const response = await saveGame(board, idToken, startTime, endTime);
+        const data = await response.json();
 
-        alert('Game ended and saved successfully!');
+        // Create achievement notification message
+        let message = 'Game ended and saved successfully!';
+        if (data.newAchievements && data.newAchievements.length > 0) {
+          message += '\n\nNew Achievements Earned:\n' + 
+            data.newAchievements.map(achievement => `🏆 ${achievement}`).join('\n');
+        }
+
+        alert(message);
       } catch (err) {
         console.error('Error ending game:', err);
         alert('Failed to end and save the game.');

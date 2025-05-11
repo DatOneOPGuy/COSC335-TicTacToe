@@ -143,18 +143,12 @@ export async function saveGameWithScore(board, idToken) {
 }
 
 export async function saveGame(board, idToken, startTime = null, endTime = null) {
-  const points = calculateScore(board, true); // Calculate final score
+  const points = calculateScore(board, true);
   const townmap = board.map((cell) =>
     cell ? (cell.type === 'building' ? cell.building : cell) : '0'
   );
 
-  console.log('Saving game...');
-  console.log('townmap:', townmap);
-  console.log('points:', points);
-  console.log('startTime:', startTime);
-  console.log('endTime:', endTime);
-
-  await fetch('http://localhost:3000/save-game', {
+  const response = await fetch('http://localhost:3000/save-game', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -169,6 +163,6 @@ export async function saveGame(board, idToken, startTime = null, endTime = null)
     }),
   });
 
-  return points;
+  return response; // Return the full response so we can check for new achievements
 }
 

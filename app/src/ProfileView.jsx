@@ -1,6 +1,14 @@
 import React from 'react';
 import { useTownStore } from './store.js';
 
+const POSSIBLE_ACHIEVEMENTS = [
+  { name: 'First Building!', description: 'Place your first building' },
+  { name: 'First Town Built!', description: 'Save your first town' },
+  { name: 'Junior Townbuilder!', description: 'Use every type of resource (wood, yellow, blue, green, stone)' },
+  { name: 'Senior Townbuilder', description: 'Build one of every type of building' },
+  { name: 'Magical Townbuilder', description: 'Fill 11 out of 12 grid cells with buildings' }
+];
+
 export function ProfileView({ onBackToGame }) {
   const [achievementsData, setAchievementsData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
@@ -48,7 +56,7 @@ export function ProfileView({ onBackToGame }) {
 
   return (
     <div className="min-h-screen p-10 text-white">
-      <div className=" mx-auto bg-[#161b22] rounded-xl shadow-2xl p-8 border border-gray-700">
+      <div className="mx-auto bg-[#161b22] rounded-xl shadow-2xl p-8 border border-gray-700">
         <button
           onClick={onBackToGame}
           className="mb-6 px-4 py-2 bg-[#d73a49] text-white rounded hover:bg-[#e55353] transition"
@@ -61,9 +69,9 @@ export function ProfileView({ onBackToGame }) {
         </h1>
   
         <section className="mb-10">
-          <h2 className="text-2xl font-semibold mb-4 text-yellow-300">🏆 Achievements</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-yellow-300">🏆 Earned Achievements</h2>
           <ul className="space-y-3 pl-4">
-            {achievementsData?.Acheivements?.map((achievement, index) => (
+            {achievementsData?.Achievements?.map((achievement, index) => (
               <li
                 key={index}
                 className="flex items-center text-lg text-gray-200"
@@ -74,8 +82,27 @@ export function ProfileView({ onBackToGame }) {
             ))}
           </ul>
         </section>
+
+        <section className="mb-10">
+          <h2 className="text-2xl font-semibold mb-4 text-yellow-300">🎯 Available Achievements</h2>
+          <ul className="space-y-3 pl-4">
+            {POSSIBLE_ACHIEVEMENTS
+              .filter(achievement => !achievementsData?.Achievements?.includes(achievement.name))
+              .map((achievement, index) => (
+                <li
+                  key={index}
+                  className="flex items-center text-lg text-gray-500"
+                >
+                  <span className="mr-2">☆</span>
+                  <div>
+                    <span className="font-semibold">{achievement.name}</span>
+                    <span className="ml-2 text-sm">- {achievement.description}</span>
+                  </div>
+                </li>
+              ))}
+          </ul>
+        </section>
       </div>
     </div>
   );
-  
 }

@@ -43,7 +43,7 @@ VITE_BACKEND_PORT=3000
 1. Clone and configure:
 
 ```bash
-git clone <repository-url>
+git clone git@github.com:DatOneOPGuy/COSC335-TicTacToe.git
 cd tiny-towns-builder
 
 # Copy Firebase files to app/

@@ -64,14 +64,13 @@ const buildingPatterns = {
       ['stone', 'glass', 'stone']
     ]
   },
-  trading_post: {
-    name: 'Trading Post',
-    icon: '📦',
+  factory: {
+    name: 'Factory',
+    icon: '🏭',
     pattern: [
-
-      [null, 'wood', 'stone'],
-      ['brick', 'wood', 'stone']
-    ]
+      ['wood', null, null,null],
+      ['brick', 'stone', 'stone', 'brick'],
+    ],
   },
   theater: {
     name: 'Theater',
@@ -79,14 +78,6 @@ const buildingPatterns = {
     pattern: [
       [null, 'stone', null],
       ['brick', 'glass', 'brick']
-    ],
-  },
-  factory: {
-    name: 'Factory',
-    icon: '🏭',
-    pattern: [
-      ['wood', null, null,null],
-      ['brick', 'stone', 'stone', 'brick'],
     ],
   },
 };

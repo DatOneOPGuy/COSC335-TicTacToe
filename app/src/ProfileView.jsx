@@ -6,7 +6,10 @@ const POSSIBLE_ACHIEVEMENTS = [
   { name: 'First Town Built!', description: 'Save your first town' },
   { name: 'Junior Townbuilder!', description: 'Use every type of resource (wood, yellow, blue, green, stone)' },
   { name: 'Senior Townbuilder', description: 'Build one of every type of building' },
-  { name: 'Magical Townbuilder', description: 'Fill 11 out of 12 grid cells with buildings' }
+  { name: 'Magical Townbuilder', description: 'Perfect Town!' },
+  { name: 'Promising Builder', description: 'Score 5 or more points in a single game' },
+  { name: 'Expert Builder', description: 'Score 10 or more points in a single game' },
+  { name: 'Master Builder', description: 'Score 20 or more points in a single game' }
 ];
 
 export function ProfileView({ onBackToGame }) {

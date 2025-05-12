@@ -27,7 +27,6 @@ export function calculateScore(board, isEndOfGame = false) {
   const taverns = [];
   const markets = [];
   const cathedrals = [];
-  const tradingPosts = [];
   const factories = [];
   const theaters = [];
   const emptySpaces = []; 
@@ -59,9 +58,6 @@ export function calculateScore(board, isEndOfGame = false) {
         case 'cathedral':
           cathedrals.push(index);
           break;
-        case 'trading_post':
-          tradingPosts.push(index);
-          break;
         case 'factory':
           factories.push(index);
           break;
@@ -71,8 +67,6 @@ export function calculateScore(board, isEndOfGame = false) {
         default:
           break;
       }
-    } else if(cell.type === 'resource'){
-      resoureSpaces.push(index);
     }
   });
 
@@ -120,9 +114,6 @@ export function calculateScore(board, isEndOfGame = false) {
     totalScore += Math.max(rowMarkets, colMarkets);
   });
 
-  //trading posts, 1 VP for each
-  totalScore += tradingPosts.length
-
   //theaters, 1 VP for each unique building in the row and column
   theaters.forEach((theater) => {
     const theaterRow = Math.floor(theater / 4);
@@ -140,6 +131,7 @@ export function calculateScore(board, isEndOfGame = false) {
       }
     });
     totalScore += uniqueBuildings.size;
+    
   });
 
 

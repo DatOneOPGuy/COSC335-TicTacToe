@@ -117,7 +117,9 @@ export function App() {
       <h1 className="text-2xl font-bold mb-4">Tiny Towns Builder</h1>
       <h2 className="text-xl font-semibold mb-4">Current Score: {score}</h2>
       <div className="flex justify-center items-start gap-8">
-        <BuildingButtons />
+        <div className="pt-8">
+          <BuildingButtons />
+        </div>
         <div>
           <ResourceDeck />
           <TownGrid />

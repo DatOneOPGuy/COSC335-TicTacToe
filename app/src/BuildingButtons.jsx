@@ -57,23 +57,17 @@ const buildingTypes = {
     pattern: 'square',
     check: checkChapel,
   },
-  trading_post: {
-    name: 'Trading Post',
-    resources: ['stone', 'stone', 'wood', 'wood', 'brick'],
-    pattern: 'complex',
-    check: checkTradingPost,
+  factory: {
+    name: 'Factory',
+    resources: ['brick', 'stone', 'brick', 'stone', 'wood'],
+    pattern: 'custom',
+    check: checkFactory,
   },
   theater: {
     name: 'Theater',
     resources: ['brick', 'glass', 'brick', 'stone'],
     pattern: 'custom',
     check: checkTheater,
-  },
-  factory: {
-    name: 'Factory',
-    resources: ['brick', 'stone', 'brick', 'stone', 'wood'],
-    pattern: 'custom',
-    check: checkFactory,
   },
 };
 
@@ -107,39 +101,13 @@ export function BuildingButtons() {
   };
 
   const buildingEntries = Object.entries(buildingTypes);
-  const topNineBuildings = buildingEntries.slice(0, 9);
-  const bottomTwoBuildings = buildingEntries.slice(9);
+  const allBuildings = buildingEntries.slice(0, 9); // Take first 9 buildings for the 3x3 grid
 
   return (
     <div className="flex flex-col items-center gap-4">
       {/* 3x3 Grid */}
       <div className="grid grid-cols-3 gap-2">
-        {topNineBuildings.map(([type, building]) => {
-          const canBuild = canBuildBuilding(type);
-          const isSelected = selectedBuilding === type;
-
-          return (
-            <button
-              key={type}
-              onClick={() => handleBuildingClick(type)}
-              disabled={!canBuild}
-              className={`p-1 rounded-md flex flex-col items-center gap-1 min-w-[80px] text-sm ${
-                canBuild
-                  ? isSelected
-                    ? 'bg-amber-800 text-white'
-                    : 'bg-amber-700 text-white hover:bg-amber-600'
-                  : 'bg-amber-900 text-white cursor-not-allowed'
-              }`}
-            >
-              <BuildingPattern buildingType={type} />
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Two Buttons Below */}
-      <div className="flex gap-4">
-        {bottomTwoBuildings.map(([type, building]) => {
+        {allBuildings.map(([type, building]) => {
           const canBuild = canBuildBuilding(type);
           const isSelected = selectedBuilding === type;
 

@@ -54,7 +54,7 @@ app.post("/save-game", async (req, res) => {
     // 1.5 First Building - Check if any building exists
     const buildingExists = townmap.some(cell => 
       ['well', 'cottage', 'farm', 'cathedral', 'tavern', 'market', 
-       'chapel', 'trading_post', 'theater', 'factory'].includes(cell)
+       'chapel', 'theater', 'factory'].includes(cell)
     );
 
     if (buildingExists && !playerData.Achievements.includes('First Building!')) {
@@ -75,7 +75,7 @@ app.post("/save-game", async (req, res) => {
 
     // 3. Senior Townbuilder - Check if all building types are present
     const requiredBuildings = ['well', 'cottage', 'farm', 'cathedral', 'tavern', 'market', 
-                          'chapel', 'trading_post', 'theater', 'factory'];
+                          'chapel', 'theater', 'factory'];
     const hasAllBuildings = requiredBuildings.every(building => 
       townmap.some(cell => cell === building)
     );
@@ -87,14 +87,30 @@ app.post("/save-game", async (req, res) => {
 
     // 4. Magical Townbuilder - Check if at least 11 cells contain buildings
     const buildingTypes = ['well', 'cottage', 'farm', 'cathedral', 'tavern', 'market', 
-                      'chapel', 'trading_post', 'theater', 'factory'];
+                      'chapel', 'theater', 'factory'];
     const buildingCount = townmap.filter(cell => 
       buildingTypes.includes(cell)
     ).length;
 
     if (buildingCount >= 11 && !playerData.Achievements.includes('Magical Townbuilder')) {
-      newAchievements.push('Magical Townbuilder');
-      console.log('Magical Townbuilder achievement earned!');
+      newAchievements.push('Perfect Town');
+      console.log('Perfect Town achievement earned!');
+    }
+
+    // 5. Score-based achievements
+    if (points >= 5 && !playerData.Achievements.includes('Promising Builder')) {
+      newAchievements.push('Promising Builder');
+      console.log('Promising Builder achievement earned! (5+ points)');
+    }
+
+    if (points >= 10 && !playerData.Achievements.includes('Expert Builder')) {
+      newAchievements.push('Expert Builder');
+      console.log('Expert Builder achievement earned! (10+ points)');
+    }
+
+    if (points >= 20 && !playerData.Achievements.includes('Master Builder')) {
+      newAchievements.push('Master Builder');
+      console.log('Master Builder achievement earned! (20+ points)');
     }
 
     // Add new achievements to player's record

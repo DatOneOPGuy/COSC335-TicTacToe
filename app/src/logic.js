@@ -27,11 +27,14 @@ export function calculateScore(board) {
   const taverns = [];
   const markets = [];
   const cathedrals = [];
-  const emptySpaces = [];
+  const tradingPosts = [];
+  const factories = [];
+  const theaters = [];
+  const emptySpaces = []; 
 
   // Categorize buildings and resources
   board.forEach((cell, index) => {
-    if (!cell) {
+    if (!cell || cell.type != 'building') {
       emptySpaces.push(index);
     } else if (cell.type === 'building') {
       switch (cell.building) {
@@ -56,9 +59,20 @@ export function calculateScore(board) {
         case 'cathedral':
           cathedrals.push(index);
           break;
+        case 'trading_post':
+          tradingPosts.push(index);
+          break;
+        case 'factory':
+          factories.push(index);
+          break;
+        case 'theater':
+          theaters.push(index);
+          break;
         default:
           break;
       }
+    } else if(cell.type === 'resource'){
+      resoureSpaces.push(index);
     }
   });
 
@@ -94,7 +108,7 @@ export function calculateScore(board) {
   totalScore += chapels.length * fedCottages.size;
 
   // Score Taverns (group scoring)
-  const tavernScores = [0, 1, 4, 9, 14, 20];
+  const tavernScores = [0, 2, 5, 9, 14, 20];
   totalScore += tavernScores[Math.min(taverns.length, 5)];
 
   // Score Markets (1 VP + 1 VP per other Market in the same row or column)
@@ -103,18 +117,38 @@ export function calculateScore(board) {
     const col = market % 4;
     const rowMarkets = markets.filter((m) => Math.floor(m / 4) === row).length - 1;
     const colMarkets = markets.filter((m) => m % 4 === col).length - 1;
-    totalScore += 1 + rowMarkets + colMarkets;
+    totalScore += Math.max(rowMarkets, colMarkets);
+  });
+
+  //trading posts, 1 VP for each
+  totalScore += tradingPosts.length
+
+  //theaters, 1 VP for each unique building in the row and column
+  theaters.forEach((theater) => {
+    const theaterRow = Math.floor(theater / 4);
+    const theaterCol = theater % 4;
+    const uniqueBuildings = new Set();
+
+    board.forEach((cell, index) => {
+      if (
+        cell &&
+        cell.type === 'building' &&
+        (Math.floor(index / 4) === theaterRow || index % 4 === theaterCol) &&
+        index !== theater
+      ) {
+        uniqueBuildings.add(cell.building);
+      }
+    });
+    totalScore += uniqueBuildings.size;
   });
 
   // Score Cathedrals (custom logic: 3 VP + 1 VP per adjacent Market or Chapel)
-  cathedrals.forEach((cathedral) => {
-    const adjacentMarkets = markets.filter((market) => isAdjacent(cathedral, market));
-    const adjacentChapels = chapels.filter((chapel) => isAdjacent(cathedral, chapel));
-    totalScore += 3 + adjacentMarkets.length + adjacentChapels.length;
-  });
 
-  // Subtract points for empty spaces (-1 VP per empty space)
-  totalScore -= emptySpaces.length;
+
+  // Subtract points for empty spaces if there is no cathedral(-1 VP per empty space)
+  if (cathedrals.length == 0){
+      totalScore -= emptySpaces.length;
+  }
 
   return totalScore;
 }

@@ -71,9 +71,6 @@ Access the application:
 # Unit tests
 docker exec -it tictactoe-backend bash
 npm test
-
-# UI tests
-npm run test:ui
 ```
 
 ## Project Structure

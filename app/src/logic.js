@@ -131,15 +131,18 @@ export function calculateScore(board, isEndOfGame = false) {
       }
     });
     totalScore += uniqueBuildings.size;
-    
   });
 
-
-  // Subtract points for empty spaces if there is no cathedral(-1 VP per empty space)
-  if (isEndOfGame && cathedrals.length == 0){
-      totalScore -= emptySpaces.length;
+  // Only subtract for empty spaces at end of game and if there is no cathedral
+  if (isEndOfGame && cathedrals.length === 0) {
+    totalScore -= emptySpaces.length;
   }
-  
+
+  // Never allow current score to be less than 0 (but allow negative final score)
+  if (!isEndOfGame && totalScore < 0) {
+    totalScore = 0;
+  }
+
   return totalScore;
 }
 

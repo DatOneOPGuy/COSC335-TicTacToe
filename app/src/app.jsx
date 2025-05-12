@@ -4,6 +4,7 @@ import { ResourceDeck } from './ResourceDeck.jsx';
 import { BuildingButtons } from './BuildingButtons.jsx';
 import { UserMenu } from './UserMenu.jsx';
 import { ProfileView } from './ProfileView.jsx';
+import { Leaderboard } from './Leaderboard.jsx';
 import { useTownStore } from './store.js';
 import { calculateScore, saveGame } from './logic.js';
 
@@ -29,6 +30,7 @@ const initializePlayer = async () => {
   if (user) {
     try {
       const idToken = await user.getIdToken();
+      // Initialize player as before
       await fetch('http://localhost:3000/player/init', {
         method: 'POST',
         headers: {
@@ -36,6 +38,30 @@ const initializePlayer = async () => {
           'Content-Type': 'application/json'
         }
       });
+
+      // Fetch player profile to check for gamertag
+      const res = await fetch('http://localhost:3000/player/profile', {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+      const data = await res.json();
+
+      if (!data.gamertag) {
+        let gamertag = '';
+        while (!gamertag || gamertag.length < 3) {
+          gamertag = prompt("Choose a gamertag (at least 3 characters):");
+          if (gamertag === null) break; // user cancelled
+        }
+        if (gamertag) {
+          await fetch('http://localhost:3000/player/gamertag', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${idToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ gamertag })
+          });
+        }
+      }
     } catch (error) {
       console.error('Error initializing player:', error);
     }
@@ -52,6 +78,7 @@ export function App() {
   const [lastBoard, setLastBoard] = useState(board);
   const [startTime, setStartTime] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   useEffect(() => {
     setStartTime(new Date().toISOString());
@@ -113,15 +140,20 @@ export function App() {
       });
     }, []);
 
-  // Render the profile view if `showProfile` is true
+  if (showLeaderboard) {
+    return <Leaderboard onBack={() => setShowLeaderboard(false)} />;
+  }
+
   if (showProfile) {
     return <ProfileView onBackToGame={() => setShowProfile(false)} />;
   }
 
-  // Render the game view by default
   return (
     <div className="p-6 text-center">
-      <UserMenu onViewProfile={() => setShowProfile(true)} />
+      <UserMenu
+        onViewProfile={() => setShowProfile(true)}
+        onViewLeaderboard={() => setShowLeaderboard(true)}
+      />
       <h1 className="text-2xl font-bold mb-4">Tiny Towns Builder</h1>
       <h2 className="text-xl font-semibold mb-4">Current Score: {score}</h2>
       {finalScore !== null && (

@@ -43,14 +43,15 @@ app.post("/save-game", async (req, res) => {
       ...gameData
     });
 
-    // Add game data to player's games array
+    // Add game data to player's games array and increment totalPoints
     const playerRef = db.collection('players').doc(uid);
     const playerDoc = await playerRef.get();
     const playerData = playerDoc.data();
 
-    // Update player's games array with the game object
+    // Update player's games array and totalPoints
     await playerRef.update({
-      games: admin.firestore.FieldValue.arrayUnion(gameData)
+      games: admin.firestore.FieldValue.arrayUnion(gameData),
+      totalPoints: admin.firestore.FieldValue.increment(points)
     });
 
     // Continue with achievements checking
@@ -145,28 +146,61 @@ app.post("/save-game", async (req, res) => {
 // Update the player initialization to include the games array
 app.post('/player/init', async (req, res) => {
   const idToken = req.headers.authorization?.split('Bearer ')[1];
-
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
-
-    const playerDoc = await db.collection('players').doc(uid).get();
+    const playerRef = db.collection('players').doc(uid);
+    const playerDoc = await playerRef.get();
 
     if (!playerDoc.exists) {
-      // Create new player document with games array
-      await db.collection('players').doc(uid).set({
+      await playerRef.set({
         uid: uid,
         Achievements: [],
-        games: [], // Will store game objects instead of raw townmap arrays
+        games: [],
+        totalPoints: 0,
+        gamertag: null,
         created: admin.firestore.FieldValue.serverTimestamp()
       });
       console.log(`Created new player document for UID: ${uid}`);
     }
-
     res.status(200).send({ success: true });
   } catch (error) {
     console.error('Error initializing player:', error);
     res.status(500).send({ error: 'Failed to initialize player' });
+  }
+});
+
+// Get player profile (for gamertag)
+app.get('/player/profile', async (req, res) => {
+  const idToken = req.headers.authorization?.split('Bearer ')[1];
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+    const playerDoc = await db.collection('players').doc(uid).get();
+    if (!playerDoc.exists) return res.status(404).send({ error: 'Player not found' });
+    const data = playerDoc.data();
+    res.status(200).send({ gamertag: data.gamertag || null });
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to fetch profile' });
+  }
+});
+
+// Set gamertag
+app.post('/player/gamertag', async (req, res) => {
+  const idToken = req.headers.authorization?.split('Bearer ')[1];
+  const { gamertag } = req.body;
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+    // Optionally: check for unique gamertag
+    const snapshot = await db.collection('players').where('gamertag', '==', gamertag).get();
+    if (!snapshot.empty) {
+      return res.status(400).send({ error: 'Gamertag already taken' });
+    }
+    await db.collection('players').doc(uid).update({ gamertag });
+    res.status(200).send({ success: true });
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to set gamertag' });
   }
 });
 
@@ -212,6 +246,30 @@ app.get('/games', async (req, res) => {
   } catch (error) {
     console.error('Error fetching games:', error);
     res.status(500).send({ error: 'Failed to fetch games' });
+  }
+});
+
+app.get('/leaderboard', async (req, res) => {
+  try {
+    const snapshot = await db.collection('players')
+      .orderBy('totalPoints', 'desc')
+      .limit(20)
+      .get();
+
+    const leaderboard = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      leaderboard.push({
+        uid: data.uid,
+        gamertag: data.gamertag || data.uid.slice(0, 8),
+        totalPoints: data.totalPoints || 0,
+      });
+    });
+
+    res.status(200).send(leaderboard);
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).send({ error: 'Failed to fetch leaderboard' });
   }
 });
 

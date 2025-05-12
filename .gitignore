@@ -1,4 +1,4 @@
-
+.DS_Store
 app/.env
 app/serviceAccountKey.json
 app/firebaseConfig.json

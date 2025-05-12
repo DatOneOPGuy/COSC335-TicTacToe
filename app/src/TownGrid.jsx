@@ -6,7 +6,7 @@ const resourceStyles = {
   wheat: 'bg-yellow-400',
   wood: 'bg-amber-800',
   brick: 'bg-red-600',
-  glass: 'bg-blue-400',
+  glass: 'bg-blue-900', // Changed to navy blue
   stone: 'bg-gray-400',
 };
 
@@ -24,14 +24,38 @@ export function TownGrid() {
   const clearSelectedCells = useTownStore((s) => s.clearSelectedCells);
 
   const handleClick = (index) => {
+    const state = useTownStore.getState();
+  
+    // Handle factory behavior
+    if (state.selectedFactory !== null) {
+      if (index !== state.selectedFactory) {
+        // Move the resource from the factory to the clicked cell
+        state.retrieveResourceFromFactory(state.selectedFactory, index);
+      }
+      state.clearFactorySelection();
+      return;
+    }
+  
+    if (grid[index] && grid[index].type === 'building') {
+      if (grid[index].building === 'factory') {
+        if (state.selectedResource) {
+          // Store the selected resource in the factory
+          state.storeResourceInFactory(index, state.selectedResource);
+        } else {
+          // Select the factory for resource retrieval
+          state.selectFactory(index);
+        }
+        return;
+      }
+      // Prevent interaction with other buildings
+      return;
+    }
+  
     if (selectedBuilding) {
-      // If a building is selected, only allow placement on selected resource cells
       if (selectedCells.includes(index) && grid[index]) {
         const newGrid = [...grid];
-        // Place the building
         newGrid[index] = { type: 'building', building: selectedBuilding };
-        // Clear the selected cells (but keep the building)
-        selectedCells.forEach(cellIndex => {
+        selectedCells.forEach((cellIndex) => {
           if (cellIndex !== index) {
             newGrid[cellIndex] = null;
           }
@@ -41,24 +65,30 @@ export function TownGrid() {
         clearSelectedCells();
       }
     } else if (grid[index]) {
-      // If the cell has a resource, toggle selection
       if (selectedCells.includes(index)) {
         removeSelectedCell(index);
       } else {
         addSelectedCell(index);
       }
     } else {
-      // Place a new resource
       placeResource(index);
     }
   };
 
   const getCellStyle = (index) => {
     let style = 'w-16 h-16 border-2 rounded transition-colors flex items-center justify-center text-2xl ';
-    
+
     if (grid[index]) {
       if (grid[index].type === 'building') {
-        style += 'bg-white text-white ';
+        if (grid[index].building === 'factory') {
+          if (grid[index].resource) {
+            style += resourceStyles[grid[index].resource] + ' '; // Use the resource's color
+          } else {
+            style += 'bg-white text-white ';
+          }
+        } else {
+          style += 'bg-white text-white ';
+        }
       } else {
         style += resourceStyles[grid[index]] + ' ';
       }
@@ -67,9 +97,9 @@ export function TownGrid() {
     }
 
     if (selectedCells.includes(index)) {
-      style += 'border-blue-400 ';
+      style += 'border-green-500 ';
     } else if (selectedTileIndex === index) {
-      style += 'border-blue-400 ';
+      style += 'border-green-500 ';
     } else {
       style += 'border-gray-500 ';
     }

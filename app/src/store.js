@@ -62,17 +62,20 @@ export const useTownStore = create((set, get) => ({
   selectedBuilding: null,
   selectedCells: [],
   buildings: {},
+  factoryResource: null, // Store the resource in the factory
+  selectedFactory: null, // Track the selected factory
 
   shuffleDeck: () => {
     const deck = shuffleArray([...resourceTypes, ...resourceTypes, ...resourceTypes]);
-    set({ deck, selectedResource: deck[0] });
+    set({ deck, selectedResource: null });
   },
 
   setSelectedResource: (resource) => set({ selectedResource: resource }),
 
   placeResource: (index) => {
     const state = get();
-    if (state.grid[index]) return;
+    if (!state.selectedResource || state.grid[index]) return;
+
     const newGrid = [...state.grid];
     newGrid[index] = state.selectedResource;
 
@@ -84,10 +87,32 @@ export const useTownStore = create((set, get) => ({
     set({
       grid: newGrid,
       deck,
-      selectedResource: deck[0],
+      selectedResource: null,
       selectedTileIndex: null,
     });
   },
+
+  storeResourceInFactory: (index, resource) => {
+    const state = get();
+    const newGrid = [...state.grid];
+    newGrid[index] = { type: 'building', building: 'factory', resource }; // Store the resource in the factory
+    set({ grid: newGrid, factoryResource: resource, selectedResource: null });
+  },
+
+  retrieveResourceFromFactory: (factoryIndex, targetIndex) => {
+    const state = get();
+    if (!state.factoryResource) return;
+
+    const newGrid = [...state.grid];
+    newGrid[factoryIndex] = { type: 'building', building: 'factory', resource: null }; // Clear the factory
+    newGrid[targetIndex] = state.factoryResource; // Place the resource in the target cell
+
+    set({ grid: newGrid, factoryResource: null, selectedFactory: null });
+  },
+
+  selectFactory: (index) => set({ selectedFactory: index }),
+
+  clearFactorySelection: () => set({ selectedFactory: null }),
 
   selectTile: (index) => {
     const state = get();

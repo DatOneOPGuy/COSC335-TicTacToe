@@ -26,12 +26,36 @@
               .then((userCredential) => {
                 const user = userCredential.user;
                 displayUserInfo(user);
+                // Remove the container completely
+                const container = document.querySelector(".w-full.max-w-sm");
+                if (container) {
+                  container.remove();
+                }
               })
               .catch((error) => {
                 console.error("Error logging in:", error.message);
               });
           };
 
+          // Update the handleGoogleLogin function
+          window.handleGoogleLogin = function () {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+              .then((result) => {
+                const user = result.user;
+                displayUserInfo(user);
+                // Remove the container completely
+                const container = document.querySelector(".w-full.max-w-sm");
+                if (container) {
+                  container.remove();
+                }
+              })
+              .catch((error) => {
+                console.error("Google login error:", error.message);
+              });
+          };
+
+          // Update the handleRegister function
           window.handleRegister = function () {
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
@@ -39,44 +63,32 @@
               .then((userCredential) => {
                 const user = userCredential.user;
                 displayUserInfo(user);
+                // Remove the container completely
+                const container = document.querySelector(".w-full.max-w-sm");
+                if (container) {
+                  container.remove();
+                }
               })
               .catch((error) => {
                 console.error("Error registering:", error.message);
               });
           };
 
-          window.handleGoogleLogin = function () {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-              .then((result) => {
-                const user = result.user;
-                displayUserInfo(user);
-              })
-              .catch((error) => {
-                console.error("Google login error:", error.message);
-              });
-          };
-
-          window.handleLogout = function () {
-            auth.signOut().then(() => {
-              document.getElementById("app").style.display = "none";
-              document.getElementById("login-form").style.display = "block";
-            }).catch((error) => {
-              console.error("Logout error:", error.message);
-            });
-          };
-
+          // Update the onAuthStateChanged listener
           auth.onAuthStateChanged((user) => {
-            const loginForm = document.getElementById("login-form");
+            const container = document.querySelector(".w-full.max-w-sm");
             const appDiv = document.getElementById("app");
 
             if (user) {
               appDiv.style.display = "block";
-              loginForm.style.display = "none";
+              // Remove the container if user is authenticated
+              if (container) {
+                container.remove();
+              }
             } else {
               appDiv.style.display = "none";
-              loginForm.style.display = "block";
-            } 
+              // The container will remain visible for login
+            }
           });
         })
         .catch(err => {
@@ -86,11 +98,29 @@
       function displayUserInfo(user) {
         document.getElementById("user-name").textContent = user.displayName || user.email;
         document.getElementById("user-info").style.display = "block";
-        document.getElementById("login-form").style.display = "none";
+        // The login form container will be removed instead of just hidden
       }
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brown: {
+                100: '#f5f5dc',
+                200: '#e0c097',
+                300: '#d2b48c',
+                600: '#8b4513',
+                700: '#5a3d31',
+                800: '#3e2723',
+              },
+            },
+          },
+        },
+      };
+    </script>
   </head>
   <body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen">
     <div class="w-full max-w-sm p-6 bg-clear rounded-lg shadow-lg">

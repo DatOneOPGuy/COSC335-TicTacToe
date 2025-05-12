@@ -17,7 +17,7 @@ export function checkWinner(board) {
   return null;
 }
 
-export function calculateScore(board) {
+export function calculateScore(board, isEndOfGame = false) {
   let totalScore = 0;
 
   const cottages = [];
@@ -142,8 +142,6 @@ export function calculateScore(board) {
     totalScore += uniqueBuildings.size;
   });
 
-  // Score Cathedrals (custom logic: 3 VP + 1 VP per adjacent Market or Chapel)
-
 
   // Subtract points for empty spaces if there is no cathedral(-1 VP per empty space)
   if (cathedrals.length == 0){
@@ -174,30 +172,27 @@ export async function saveGameWithScore(board, idToken) {
   return points;
 }
 
-export async function saveGame(board, idToken, starttime = null) {
-  const points = calculateScore(board);
-  const townmap = board.map((cell) => (cell ? (cell.type === 'building' ? cell.building : cell) : '0'));
+export async function saveGame(board, idToken, startTime = null, endTime = null) {
+  const points = calculateScore(board, true);
+  const townmap = board.map((cell) =>
+    cell ? (cell.type === 'building' ? cell.building : cell) : '0'
+  );
 
-  console.log("Saving game...");
-  console.log("townmap:", townmap);
-  console.log("points:", points);
-  console.log("idToken:", idToken);
-
-  await fetch("http://localhost:3000/save-game", {
-    method: "POST",
+  const response = await fetch('http://localhost:3000/save-game', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${idToken}`,
     },
     body: JSON.stringify({
       townmap,
       points,
-      starttime,
+      startTime,
+      endTime,
       timestamp: new Date().toISOString(),
-      uid: idToken, // Assuming idToken is the user ID
     }),
   });
 
-  return points;
+  return response; // Return the full response so we can check for new achievements
 }
 

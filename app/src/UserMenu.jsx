@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTownStore } from './store.js';
+import { ProfileView } from './ProfileView.jsx';
 
-export function UserMenu() {
+export function UserMenu({ onViewProfile }) {
   const [isOpen, setIsOpen] = useState(false);
   const logout = useTownStore((s) => s.logout);
 
@@ -18,20 +19,17 @@ export function UserMenu() {
       >
         👤
       </button>
-      
+
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg py-2">
           <button
             className="w-full px-4 py-2 text-left text-white hover:bg-gray-700"
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false);
+              onViewProfile();
+            }}
           >
             View Profile
-          </button>
-          <button
-            className="w-full px-4 py-2 text-left text-white hover:bg-gray-700"
-            onClick={() => setIsOpen(false)}
-          >
-            View Achievements
           </button>
           <button
             className="w-full px-4 py-2 text-left text-white hover:bg-gray-700"
@@ -43,4 +41,4 @@ export function UserMenu() {
       )}
     </div>
   );
-} 
+}

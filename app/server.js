@@ -253,7 +253,7 @@ app.get('/leaderboard', async (req, res) => {
   try {
     const snapshot = await db.collection('players')
       .orderBy('totalPoints', 'desc')
-      .limit(20)
+      .limit(10)  // Changed from 20 to 10
       .get();
 
     const leaderboard = [];

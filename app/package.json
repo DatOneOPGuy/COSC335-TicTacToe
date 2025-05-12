@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage"
   },
@@ -40,5 +41,8 @@
     "@vitest/coverage-v8": "^3.1.0",
     "istanbul-lib-source-maps": "^4.0.0",
     "jsdom": "^24.0.0"
+  },
+  "moduleNameMapper": {
+    "^firebase$": "<rootDir>/tests/__mocks__/firebase.js"
   }
 }

@@ -32,6 +32,43 @@ const buildingIcons = {
   theater: '🎭',
 };
 
+// Add this near the top of the file, after the imports
+const formatDate = (timestamp) => {
+  // Use a fallback timestamp if none provided
+  const dateToFormat = timestamp || new Date().toISOString();
+  
+  try {
+    const date = new Date(dateToFormat);
+    
+    // Validate the date
+    if (isNaN(date.getTime())) {
+      console.warn('Invalid timestamp:', timestamp);
+      return {
+        date: "Unknown Date",
+        time: "Unknown Time"
+      };
+    }
+    
+    return {
+      date: date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      }),
+      time: date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    };
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return {
+      date: "Unknown Date",
+      time: "Unknown Time"
+    };
+  }
+};
+
 export function ProfileView({ onBackToGame }) {
   const [achievementsData, setAchievementsData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
@@ -69,19 +106,20 @@ export function ProfileView({ onBackToGame }) {
   const handleLoadGame = () => {
     if (selectedGame) {
       const store = useTownStore.getState();
-      // First reset everything
       store.resetGrid();
-      // Convert and set the grid
       const newGrid = convertTownmapToGrid(selectedGame.townmap);
       store.setGrid(newGrid);
-      // Clear any selection state for a clean UI
       store.clearSelectedCells();
       store.setSelectedBuilding(null);
       store.setSelectedResource(null);
-      // Reshuffle the resource deck
       store.shuffleDeck();
-      // Show confirmation
-      alert(`Game from ${new Date(selectedGame.timestamp).toLocaleDateString()} loaded!`);
+      
+      const formatted = formatDate(selectedGame.timestamp);
+      const displayDate = typeof formatted === 'string' ? 
+        formatted : 
+        `${formatted.date} ${formatted.time}`;
+      
+      alert(`Game from ${displayDate} loaded!`);
       onBackToGame();
     }
   };
@@ -92,37 +130,49 @@ export function ProfileView({ onBackToGame }) {
         const user = firebase.auth().currentUser;
         if (!user) {
           alert('No user is signed in.');
+          setLoading(false); // Ensure loading is set to false
           return;
         }
 
         const idToken = await user.getIdToken();
 
-        // Fetch both achievements and game history
-        const [achievementsResponse, gamesResponse] = await Promise.all([
-          fetch('http://localhost:3000/achievements', {
-            headers: { Authorization: `Bearer ${idToken}` },
-          }),
-          fetch('http://localhost:3000/games', {
-            headers: { Authorization: `Bearer ${idToken}` },
-          })
-        ]);
+        // Fetch achievements
+        const achievementsResponse = await fetch('http://localhost:3000/achievements', {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
 
-        if (!achievementsResponse.ok || !gamesResponse.ok) {
-          throw new Error('Failed to fetch data');
+        if (!achievementsResponse.ok) {
+          throw new Error(`Failed to fetch achievements: ${achievementsResponse.statusText}`);
         }
 
         const achievementsData = await achievementsResponse.json();
-        const gamesData = await gamesResponse.json();
-
         console.log('Fetched achievements:', achievementsData); // Debug log
-        console.log('Fetched games:', gamesData); // Debug log
-
         setAchievementsData(achievementsData);
+
+        // Fetch games
+        const gamesResponse = await fetch('http://localhost:3000/games', {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+
+        if (!gamesResponse.ok) {
+          throw new Error(`Failed to fetch games: ${gamesResponse.statusText}`);
+        }
+
+        const gamesData = await gamesResponse.json();
+        console.log('Raw games data:', gamesData);
+        gamesData.forEach((game, index) => {
+          console.log(`Game ${index} timestamp:`, {
+            raw: game.timestamp,
+            type: typeof game.timestamp,
+            parsed: new Date(game.timestamp),
+            valid: !isNaN(new Date(game.timestamp).getTime())
+          });
+        });
         setGameHistory(Array.isArray(gamesData) ? gamesData : []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
-        setLoading(false);
+        setLoading(false); // Ensure loading is set to false in all cases
       }
     };
 
@@ -240,7 +290,15 @@ export function ProfileView({ onBackToGame }) {
                           </td>
                           <td className="p-2">{game.points}</td>
                           <td className="p-2">
-                            {new Date(game.timestamp).toLocaleDateString()}
+                            {(() => {
+                              const formatted = formatDate(game.timestamp);
+                              return (
+                                <div>
+                                  <div>{formatted.date}</div>
+                                  <div className="text-sm text-gray-400">{formatted.time}</div>
+                                </div>
+                              );
+                            })()}
                           </td>
                         </tr>
                       ))}

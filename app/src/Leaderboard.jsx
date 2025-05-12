@@ -24,7 +24,7 @@ export function Leaderboard({ onBack }) {
           ⬅ Back
         </button>
         <h1 className="text-4xl font-extrabold mb-8 text-yellow-400 text-center">
-          🏆 Leaderboard
+          🏆 Top 10 Players
         </h1>
         {loading ? (
           <div className="text-center">Loading...</div>
@@ -39,8 +39,18 @@ export function Leaderboard({ onBack }) {
             </thead>
             <tbody>
               {leaders.map((player, idx) => (
-                <tr key={player.uid} className="border-b border-gray-800">
-                  <td className="p-2">{idx + 1}</td>
+                <tr 
+                  key={player.uid} 
+                  className={`border-b border-gray-800 ${
+                    idx < 3 ? 'text-yellow-400 font-semibold' : ''
+                  }`}
+                >
+                  <td className="p-2">
+                    {idx === 0 ? '🥇' : 
+                     idx === 1 ? '🥈' : 
+                     idx === 2 ? '🥉' : 
+                     `${idx + 1}`}
+                  </td>
                   <td className="p-2">{player.gamertag}</td>
                   <td className="p-2">{player.totalPoints}</td>
                 </tr>

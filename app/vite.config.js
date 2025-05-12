@@ -20,20 +20,15 @@ export default ({ mode }) => {
     test: {
       globals: true,
       environment: 'jsdom',
-      coverage: {
-        reporter: ['text', 'html'], 
-        reportsDirectory: './coverage',
-        exclude: [
-          'eslint.config.*',
-          'vite.config.*',
-          '**/*.d.ts',
-          'node_modules/',
-          'tests/',
-          '**/*.test.*',
-          'coverage/',
-          'dist/'
-        ],
+      setupFiles: ['./tests/setup.js'],
+      deps: {
+        inline: ['firebase']
       },
+      testTimeout: 5000, // Reduce from 10000 to 5000
+      mockReset: true,
+      poolOptions: {
+        threads: false  // Disable threading here instead
+      }
     },
   });
 };

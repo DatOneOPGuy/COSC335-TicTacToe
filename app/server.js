@@ -29,20 +29,32 @@ app.post("/save-game", async (req, res) => {
     const uid = decodedToken.uid;
     const { townmap, points, startTime, endTime, timestamp } = req.body;
 
-    // Save the game
+    // Create a game object
+    const gameData = {
+      townmap: townmap,
+      points: points,
+      timestamp: timestamp || new Date().toISOString(),
+      startTime: startTime || null,
+      endTime: endTime || null
+    };
+
+    // Save the game to towns collection
     await db.collection("towns").add({
       uid,
-      townmap,
-      points,
-      startTime: startTime || null,
-      endTime: endTime || null,
-      timestamp: timestamp || new Date().toISOString(),
+      ...gameData
     });
 
-    // Get player reference and data
+    // Add game data to player's games array
     const playerRef = db.collection('players').doc(uid);
     const playerDoc = await playerRef.get();
     const playerData = playerDoc.data();
+
+    // Update player's games array with the game object
+    await playerRef.update({
+      games: admin.firestore.FieldValue.arrayUnion(gameData)
+    });
+
+    // Continue with achievements checking
     const newAchievements = [];
 
     // Check for achievements
@@ -131,6 +143,7 @@ app.post("/save-game", async (req, res) => {
   }
 });
 
+// Update the player initialization to include the games array
 app.post('/player/init', async (req, res) => {
   const idToken = req.headers.authorization?.split('Bearer ')[1];
 
@@ -138,14 +151,14 @@ app.post('/player/init', async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    // Check if player document already exists
     const playerDoc = await db.collection('players').doc(uid).get();
 
     if (!playerDoc.exists) {
-      // Create new player document
+      // Create new player document with games array
       await db.collection('players').doc(uid).set({
         uid: uid,
         Achievements: [],
+        games: [], // Will store game objects instead of raw townmap arrays
         created: admin.firestore.FieldValue.serverTimestamp()
       });
       console.log(`Created new player document for UID: ${uid}`);

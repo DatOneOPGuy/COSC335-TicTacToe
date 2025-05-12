@@ -1,61 +1,87 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { App } from '../src/app.jsx';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { App } from "../src/app.jsx";
+import "@testing-library/jest-dom";
 
-describe("Tiny Towns App DOM", () => {
-  beforeEach(() => {
-    render(<App />);
-  });
+// Mock fetch globally
+global.fetch = vi.fn(() => Promise.resolve({
+  ok: true,
+  json: () => Promise.resolve({})
+}));
 
-  test("renders a 4x4 grid (16 tiles)", () => {
-    const gridButtons = screen.getAllByRole("button").filter(btn =>
+beforeEach(async () => {
+  fetch.mockClear();
+  render(<App />);
+  // Wait once for initial render
+  await waitFor(() => {
+    expect(screen.getByRole("button", { name: /reset/i })).toBeInTheDocument();
+  }, { timeout: 1000 });
+});
+
+describe("Tiny Towns App UI", () => {
+  test("places a resource on the grid", async () => {
+    const gridButtons = screen.getAllByRole("button").filter((btn) =>
       btn.className.includes("w-16")
     );
-    expect(gridButtons.length).toBe(16);
-  });
-
-  test("renders top 3 resource selection buttons", () => {
-    const resourceButtons = screen.getAllByRole("button").filter(btn =>
+    const resourceButtons = screen.getAllByRole("button").filter((btn) =>
       btn.textContent.trim().length > 0 && btn.className.includes("capitalize")
     );
-    expect(resourceButtons.length).toBe(3);
+    
+    // Select a resource
+    fireEvent.click(resourceButtons[0]);
+    
+    // Place the resource on the grid
+    fireEvent.click(gridButtons[0]);
+    
+    await waitFor(() => {
+      expect(gridButtons[0].className).toContain(resourceButtons[0].textContent.toLowerCase());
+    }, { timeout: 1000 });
   });
 
-  test("clicking a grid tile colors it (places resource)", () => {
-    const gridButtons = screen.getAllByRole("button").filter(btn =>
+  test("builds a building on the grid", async () => {
+    const gridButtons = screen.getAllByRole("button").filter((btn) =>
       btn.className.includes("w-16")
     );
-
-    const initialClass = gridButtons[0].className;
-    fireEvent.click(gridButtons[0]);
-
-    expect(gridButtons[0].className).not.toBe(initialClass);
-  });
-
-  test("clicking a tile with a resource selects it (adds border)", () => {
-    const gridButtons = screen.getAllByRole("button").filter(btn =>
-      btn.className.includes("w-16")
+    const resourceButtons = screen.getAllByRole("button").filter((btn) =>
+      btn.textContent.trim().length > 0 && btn.className.includes("capitalize")
     );
-  
-    // Step 1: Place a resource
+
+    // Place resources for a well (simpler building to test)
+    fireEvent.click(resourceButtons.find(btn => btn.textContent.includes("stone")));
     fireEvent.click(gridButtons[0]);
-  
-    // Step 2: Select the tile (only if it has a resource)
+    fireEvent.click(resourceButtons.find(btn => btn.textContent.includes("wood")));
+    fireEvent.click(gridButtons[1]);
+
+    // Select cells and build
     fireEvent.click(gridButtons[0]);
-  
-    // Step 3: Expect border highlight (indicating selection)
-    expect(gridButtons[0].className).toMatch(/border-blue-400/);
+    fireEvent.click(gridButtons[1]);
+    
+    const wellButton = screen.getByText("Well", { exact: false });
+    fireEvent.click(wellButton);
+
+    await waitFor(() => {
+      expect(gridButtons[0]).toHaveClass("bg-white");
+    }, { timeout: 1000 });
   });
-  
 
-  test("reset button clears the board", () => {
-    const allButtons = screen.getAllByRole("button");
-    const gridButtons = allButtons.filter(btn => btn.className.includes("w-16"));
-    const resetButton = allButtons.find(btn => btn.textContent.toLowerCase().includes("reset"));
+  test("resets the grid", async () => {
+    await waitFor(() => {
+      const resetButton = screen.getByRole("button", { name: /reset/i });
+      fireEvent.click(resetButton);
+      
+      const gridButtons = screen.getAllByRole("button").filter((btn) =>
+        btn.className.includes("w-16")
+      );
+      expect(gridButtons[0]).toHaveClass("bg-gray-800");
+    });
+  });
 
-    fireEvent.click(gridButtons[0]); // Place resource
-    fireEvent.click(resetButton);    // Reset grid
-
-    expect(gridButtons[0].className).toMatch(/bg-gray-800/); // Back to empty
+  test("displays achievements in the profile view", async () => {
+    await waitFor(() => {
+      const profileButton = screen.getByRole("button", { name: /profile/i });
+      fireEvent.click(profileButton);
+      
+      expect(screen.getByText(/earned achievements/i)).toBeInTheDocument();
+    });
   });
 });

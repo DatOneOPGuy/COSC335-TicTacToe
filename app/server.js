@@ -33,7 +33,6 @@ app.post("/save-game", async (req, res) => {
     const gameData = {
       townmap: townmap,
       points: points,
-      timestamp: timestamp || new Date().toISOString(),
       startTime: startTime || null,
       endTime: endTime || null
     };
@@ -75,7 +74,7 @@ app.post("/save-game", async (req, res) => {
     }
 
     // 2. Junior Townbuilder - Check if all resource types are present
-    const requiredResources = ['w', 'y', 'b', 'g', 's'];
+    const requiredResources = ['wood', 'wheat', 'brick', 'glass', 'stone'];
     const hasAllResources = requiredResources.every(resource => 
       townmap.some(cell => cell === resource)
     );
@@ -178,22 +177,17 @@ app.get('/achievements', async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    console.log(`Fetching achievements for UID: ${uid}`); // Debugging
-
     const playerDoc = await db.collection('players').doc(uid).get();
     if (!playerDoc.exists) {
       return res.status(404).send({ error: 'Player not found' });
     }
 
     const playerData = playerDoc.data();
-    const achievements = playerData.Achievements || "nah u dont have any lol"; // Default to an empty array if no achievements
-    console.log('Player Data:', playerData); // Debugging
-    console.log('Achievements:', achievements); // Debugging
-    console.log('hi'); // Debugging
+    // Remove the "nah u dont have any lol" and use empty array as default
+    const achievements = playerData.Achievements || [];
 
-    res.status(200).send(playerData);
+    res.status(200).send({ Achievements: achievements });
   } catch (error) {
-    console.log(playerDoc); // Debugging
     console.error('Error fetching achievements:', error);
     res.status(500).send({ error: 'Failed to fetch achievements' });
   }
@@ -206,8 +200,13 @@ app.get('/games', async (req, res) => {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    const gamesSnapshot = await db.collection('towns').where('uid', '==', uid).get();
-    const games = gamesSnapshot.docs.map((doc) => doc.data());
+    const playerDoc = await db.collection('players').doc(uid).get();
+    if (!playerDoc.exists) {
+      return res.status(404).send({ error: 'Player not found' });
+    }
+
+    const playerData = playerDoc.data();
+    const games = playerData.games || [];
 
     res.status(200).send(games);
   } catch (error) {

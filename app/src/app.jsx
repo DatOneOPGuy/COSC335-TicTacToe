@@ -46,24 +46,30 @@ export function App() {
   const resetGrid = useTownStore((s) => s.resetGrid);
   const shuffleDeck = useTownStore((s) => s.shuffleDeck);
   const board = useTownStore((s) => s.grid);
+  const setGrid = useTownStore((s) => s.setGrid);
   const [score, setScore] = useState(0);
-  const [startTime, setStartTime] = useState(null); // Track game start time
-  const [showProfile, setShowProfile] = useState(false); // State to toggle profile view
+  const [finalScore, setFinalScore] = useState(null);
+  const [lastBoard, setLastBoard] = useState(board);
+  const [startTime, setStartTime] = useState(null);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
-    // Initialize the game start time and shuffle the deck
     setStartTime(new Date().toISOString());
     shuffleDeck();
   }, []);
 
   useEffect(() => {
-    // Recalculate the score whenever the board changes
-    setScore(calculateScore(board));
+    setScore(calculateScore(board)); // <-- This should NOT include the penalty
+    if (finalScore !== null && board !== lastBoard) {
+      setFinalScore(null);
+    }
+    setLastBoard(board);
   }, [board]);
 
   const handleResetGame = () => {
     resetGrid();
-    setStartTime(new Date().toISOString()); // Update start time when the game is reset
+    setStartTime(new Date().toISOString());
+    setFinalScore(null);
   };
 
   const handleEndGame = async () => {
@@ -72,13 +78,15 @@ export function App() {
       try {
         const idToken = await user.getIdToken();
         const endTime = new Date().toISOString();
-        const points = calculateScore(board, true);
+        const points = calculateScore(board, true); // <-- This DOES include the penalty
 
         // Save the game and get new achievements
         const response = await saveGame(board, idToken, startTime, endTime);
         const data = await response.json();
 
-        // Create achievement notification message
+        // Show final score
+        setFinalScore(points);
+
         let message = 'Game ended and saved successfully!';
         if (data.newAchievements && data.newAchievements.length > 0) {
           message += '\n\nNew Achievements Earned:\n' + 
@@ -116,6 +124,11 @@ export function App() {
       <UserMenu onViewProfile={() => setShowProfile(true)} />
       <h1 className="text-2xl font-bold mb-4">Tiny Towns Builder</h1>
       <h2 className="text-xl font-semibold mb-4">Current Score: {score}</h2>
+      {finalScore !== null && (
+        <div className="text-lg font-bold text-green-400 mb-2">
+          Final Score: {finalScore}
+        </div>
+      )}
       <div className="flex justify-center items-start gap-8">
         <div className="pt-8">
           <BuildingButtons />

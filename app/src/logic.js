@@ -136,10 +136,10 @@ export function calculateScore(board, isEndOfGame = false) {
 
 
   // Subtract points for empty spaces if there is no cathedral(-1 VP per empty space)
-  if (cathedrals.length == 0){
+  if (isEndOfGame && cathedrals.length == 0){
       totalScore -= emptySpaces.length;
   }
-
+  
   return totalScore;
 }
 
